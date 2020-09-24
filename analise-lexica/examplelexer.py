@@ -6,7 +6,8 @@ import ply.lex as lex
 reserved = {
     'if' : 'IF',
     'then' : 'THEN',
-    'else' : 'ELSE'
+    'else' : 'ELSE',
+    'while' : 'WHILE'#criado palavra reservada WHILE
 }
 
 # List of token names.   This is always required
@@ -19,6 +20,7 @@ tokens = [
     'GT',
     'ID',
     'NUMBER',
+    'STRING',#criado tipo STRING
     'RELOP'
 ] + list(reserved.values())
 
@@ -55,15 +57,21 @@ def t_GT(t):
     t.value = 'GT'
     return t
 
-def t_EQ(t):
-    r'='
+def t_EQ(t):#alterado o EQ de '=' para '=='
+    r'=='
     t.type = 'RELOP'
     t.value = 'EQ'
     return t
 
 def t_ID(t):
-    r'[a-zA-Z][a-zA-Z0-9]*'
+    r'[a-zA-Z_][a-zA-Z0-9_]*'
     t.type = reserved.get(t.value,'ID') # Check for reserved words
+    return t
+
+# criada uma função para aceitar string
+def t_STRING(t):
+    r'"[a-zA-Z0-9_]*"'
+    t.type = 'STRING'
     return t
 
 # A regular expression rule with some action code
