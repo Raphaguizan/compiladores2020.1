@@ -341,15 +341,15 @@ if __name__ == '__main__':
     p = {"E" : [("T", "E'")],
          "E'" : [("+", "T", "E'"), ("epsilon",)],
          "T" : [("F", "T'")],
-         "T'" : [("", "F", "T'"), ("epsilon",)],
+         "T'" : [("*", "F", "T'"), ("epsilon",)],
          "F" : [("(", "E", ")"), ("id",)]}
     # Grammar 4.28
     g = Grammar("E", p, ["E", "E'", "T", "T'", "F"],
-                ["+", "", "(", ")", "id"])
+                ["+", "*", "(", ")", "id"])
 
     ex = Exercise("Example 4.30 of the Dragon book, 2nd.", g)
     ex.solve()
-
+    
     # Production rules for Example 4.33
     p = {"S" : [("i", "E", "t", "S", "S'"), ("a", )],
          "S'" : [("e", "S"), ("epsilon",)],
