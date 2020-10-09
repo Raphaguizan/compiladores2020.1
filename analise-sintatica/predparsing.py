@@ -82,16 +82,30 @@ class Grammar:
             x_1 = w[0]
             # "Add to FIRST(X_1 X_2 ... X_n) all non-epsilon symbols of
             # FIRST(X_1)."
-
+            for syb in self.first_tab[x_1]:
+               if syb != "epsilon":
+                   first_w.add(syb)
+    
             ### Do your magic!
 
             # Also add the non-epsilon symbols of FIRST(X_2), if epsilon is in
             # FIRST(X_1), and so on until X_n.
-
+            for x_n in range(1, len(w)):
+                if "epsilon" in self.first_tab[w[x_n -1]]:
+                    for syb in self.first_tab[w[x_n]]:
+                        if syb != "epsilon":
+                            first_w.add(syb)
+            
             ### Do your magic!
             
             # Finally, add epsilon to FIRST(X_1 X_2 ... X_n) if for all i
             # epsilon \in FIRST(X_i).
+            check = True
+            for x_n in w:
+                if not "epsilon" in self.first_tab[x_n]:
+                    check = False
+            if check:
+                first_w.add("epsilon")
 
             ### Do your magic!
             
@@ -139,7 +153,13 @@ class Grammar:
                     # epsilon \in FISRT(y_j), for every 1 <= j <= i.
                     # However, we only reach j if every k 1 <= k < j
                     # has been reached before.
-
+                    if y_ant in self.non_terminals:
+                        hasEpsilon = False
+                        for rhs_aux in self.production_rules[y_ant]:
+                            if rhs_aux[0] == "epsilon":
+                                hasEpsilon = True
+                        if hasEpsilon:
+                            self.first_tab[s].add(self.first_tab[y_i])
                     ### Do your magic!
 
                     
@@ -185,7 +205,8 @@ class Grammar:
         '''
         Traces the execution of the algorithm for calculating FOLLOW.
         '''
-        if not follow.issubset(self.follow_tab[symb]):
+        #if not follow.issubset(self.follow_tab[symb]):
+        if not follow in self.follow_tab[symb]:#modifiquei essa parte porque issubset não é reconhecido como um atributo de str no meu computador
             self.follow_trace.append("Added " + str(follow) + " to FOLLOW(" + str(symb) + ") " + \
                                      "while processing rule " + str(symb) + " -> " +  ''.join(rhs))
 
@@ -204,6 +225,13 @@ class Grammar:
         # apply the following rules until nothing can be
         # added to any FOLLOW set.
         while True:
+            old = self.follow_tab_size()
+
+            for nont in self.non_terminals:
+                self.follow(nont)
+
+            if old == self.follow_tab_size():
+                break
             ### Do your magic!
             pass
 
@@ -222,18 +250,30 @@ class Grammar:
                         # If there is a production A -> alpha􏰐B beta then everything in
                         # FIRST(beta),􏰚except epsilon, is in FOLLOW(B).
                         
+                        for elem in self.first_tab[beta[0]]:
+                            if elem != "epsilon":
+                                self.follow_log(B, elem, rhs)
+                                self.follow_tab[B].add(elem)
+                                
                         ### Do your magic!
-
                         # If there is a production A -> alpha B beta
                         # where FIRST(beta) contains epsilon, then FOLLOW(A) \subset FOLLOW(B) 􏰛􏰂
 
-                        ### Do your magic! 
+                        if "epsilon" in self.first_tab[beta[0]]:
+                            for elem in self.follow_tab[s]:
+                                self.follow_log(B, elem, rhs)
+                                self.follow_tab[B].add(elem)
+                                
+                        ### Do your magic!
                         pass
                     else:
                         # If there is a production A -> alpha B
                         # then FOLLOW(A) \subset FOLLOW(B) 􏰛􏰂
-
-                        ### Do your magic!
+                        for elem in self.follow_tab[s]:
+                            self.follow_log(B, elem, rhs)
+                            self.follow_tab[B].add(elem)
+                            
+                            ### Do your magic!
                         pass
     def compute_pred_parsing_tab(self):
         '''
@@ -248,12 +288,21 @@ class Grammar:
                 # is in FOLLOW(A), add A -> alpha to M[A, $] as well.
                 if alpha == ("epsilon",) or \
                    (alpha != ("epsilon",) and ("epsilon" in self.firstW(alpha))):
+                    
+                    for b in self.follow_tab[A]:
+                        if b in self.terminals or b == '$':
+                            self.pred_parsing_tab[A].get(b).append(''.join(A)+" -> epsilon");
+
 
                     ### Do your magic!
 
                 else:
                     # For each terminal a in FIRST(alpha), 
                     # add A -> alpha to M[A, a]
+
+                    for a in self.firstW(alpha):
+                        if a in self.terminals:
+                            self.pred_parsing_tab[A].get(a).append(''.join(A) + " -> " + ''.join(alpha));
 
                     ### Do your magic!
                     
@@ -262,6 +311,7 @@ class Grammar:
         df = pd.DataFrame(self.pred_parsing_tab).T
         df.fillna(0, inplace=True)
         print(tabulate(df, headers='keys', tablefmt='psql'))
+
 
 class Exercise:
     def __init__(self, s, g):
@@ -291,15 +341,15 @@ if __name__ == '__main__':
     p = {"E" : [("T", "E'")],
          "E'" : [("+", "T", "E'"), ("epsilon",)],
          "T" : [("F", "T'")],
-         "T'" : [("*", "F", "T'"), ("epsilon",)],
+         "T'" : [("", "F", "T'"), ("epsilon",)],
          "F" : [("(", "E", ")"), ("id",)]}
     # Grammar 4.28
     g = Grammar("E", p, ["E", "E'", "T", "T'", "F"],
-                ["+", "*", "(", ")", "id"])
+                ["+", "", "(", ")", "id"])
 
     ex = Exercise("Example 4.30 of the Dragon book, 2nd.", g)
     ex.solve()
-    
+
     # Production rules for Example 4.33
     p = {"S" : [("i", "E", "t", "S", "S'"), ("a", )],
          "S'" : [("e", "S"), ("epsilon",)],

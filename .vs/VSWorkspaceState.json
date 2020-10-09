@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\analise-lexica"
+    "\\analise-lexica",
+    "\\analise-sintatica"
   ],
-  "SelectedNode": "\\analise-lexica\\log",
+  "SelectedNode": "\\analise-sintatica",
   "PreviewInSolutionExplorer": false
 }
