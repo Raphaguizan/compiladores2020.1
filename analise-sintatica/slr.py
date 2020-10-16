@@ -211,7 +211,6 @@ if __name__ == '__main__':
     print("Example 4.4.1, pg 246")
     pp.pprint(goto({("E'", "E", 1), ("E", ("E","+","T"), 1)}, "+", g))
     augment(g)
-    print("canonical itens")#apagar
     pp.pprint(canonical_items(g))
     print("\n# Production rules for Example 4.45, pg 251, Exp. Grammar 4.1.")
     g.print_productions()
