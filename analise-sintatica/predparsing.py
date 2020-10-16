@@ -48,6 +48,7 @@ class Grammar:
         self.pred_parsing_trace = []
         self.pp = pprint.PrettyPrinter()
         self.first_computed = False
+        self.follow_computed = False #tive que criar esse atributo que tentava executar no slr.py, mas não existia
     
     def getSymbols(self):
         symbols = self.non_terminals.copy()
@@ -133,6 +134,11 @@ class Grammar:
                     break
                 # We must first calculate FIRST(y_1) before
                 # use it.
+
+                
+                if y_1 == s: # fiz essa verificação para evitar o loop infinito dentro dessa função(aparentemente deu certo)
+                    continue
+
                 if self.first_tab[y_1] == set():
                     self.first(y_1)
                 # FIRST(y_1) \subseteq FIRST(s)    
@@ -153,6 +159,7 @@ class Grammar:
                     # epsilon \in FISRT(y_j), for every 1 <= j <= i.
                     # However, we only reach j if every k 1 <= k < j
                     # has been reached before.
+
                     if y_ant in self.non_terminals:
                         hasEpsilon = False
                         for rhs_aux in self.production_rules[y_ant]:
@@ -160,6 +167,7 @@ class Grammar:
                                 hasEpsilon = True
                         if hasEpsilon:
                             self.first_tab[s].add(self.first_tab[y_i])
+
                     ### Do your magic!
 
                     
@@ -234,7 +242,7 @@ class Grammar:
                 break
             ### Do your magic!
             pass
-
+        self.follow_computed = True # Atributo que foi criado agora setado para true após a tabela de follow ser calculada
             
     def follow(self, s):
         '''
