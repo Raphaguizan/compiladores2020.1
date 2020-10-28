@@ -1,9 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\analise-lexica",
-    "\\analise-sintatica"
+    "\\geracao-codigo-intermediario",
+    "\\geracao-codigo-intermediario\\examples"
   ],
-  "SelectedNode": "\\analise-sintatica",
+  "SelectedNode": "\\geracao-codigo-intermediario\\requirements.txt",
   "PreviewInSolutionExplorer": false
 }
