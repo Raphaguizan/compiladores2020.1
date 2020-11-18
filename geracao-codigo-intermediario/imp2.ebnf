@@ -1,12 +1,13 @@
 @@grammar::IMP
-@@eol_comments :: /#.*?$/
-
+@@eol_comments :: /\/\/.*?$/
 @@keyword :: 'and'
 @@keyword :: 'not'
 @@keyword :: 'or'
 @@keyword :: 'True'
 @@keyword :: 'False'
 @@keyword :: '+'
+@@keyword :: '++'
+@@keyword :: '->'
 @@keyword :: '-'
 @@keyword :: '(' ')'
 @@keyword :: '=='
@@ -15,76 +16,60 @@
 @@keyword :: '>'
 @@keyword :: '>='
 @@keyword :: ':='
-@@keyword :: 'while' 
+@@keyword :: 'while'
+@@keyword :: '#'
 @@keyword :: 'if' 'then' 'else' 
 @@keyword :: 'var' '='
 @@keyword :: 'const' '='
 @@keyword :: ';'
 @@keyword :: 'skip'
 @@keyword :: '{' '}'
+@@keyword :: '[' ']'
 @@keyword :: 'print'
 
 start = [ds:decSeq] [cs:cmd_seq] $ ;
+exp = bin_exp | arr_conc | arr_idx | arr_append | paren_exp | un_exp | arr_int | @:atom ;
 
-exp = paren_exp | bin_exp | un_exp | @:atom ;
+
+arr_int = "[" e:exp {','e:exp}* "]";
+arr_idx = idn:identifier"["e:exp"]" ;
+
+arr_conc = l1:exp op:"->" l2:exp ;
+arr_append = l1:exp op:"++" l2:exp ;
 
 paren_exp = "(" e:exp ")" ;
-
 bin_exp = e1:exp op:binop e2:exp ;
-
-un_exp = op:"not" e:exp ;
-
+un_exp =  op:"not" e:exp | op:"#" e:exp;
 atom = @:num_atom  | @:truth_atom | @:id_atom ;
 
 num_atom = number ;
-
 truth_atom = truth ;
-
 id_atom = identifier ;
 
-binop = "and"| "or" | "==" | "<=" | ">=" | "<" | ">"  | "+" | "-" | "*" | "/"  ; 
+binop = "and"| "or" | "==" | "<=" | ">=" | "<" | ">"  | "+" | "-" | "*" | "/"  ;
 
 truth = 'True' | 'False' ;
-
 # This makes sure that an identifier does not match a keyword.
 @name
 identifier = /(?!\d)\w+/ ;
-
 number = /\d+/ ;
-
 blk = "{" ds:decSeq cs:cmd_seq "}" ;
-
 cmd_seq = ";"%{ac:atom_cmd}+ ;
+atom_cmd = cond | loop | arr_asgn | assign | print | call | skip ;
 
-atom_cmd = cond | loop | assign | print | call | skip ;
+arr_asgn = idn:identifier"["idx:exp"]" op:":=" e:exp ;
+assign =  idn:identifier op:":=" e:exp ;
 
 skip = "skip" ;
-
-assign = idn:identifier op:":=" e:exp ;
-
 print = op:"print" e:exp ;
-
 cond = op:"if" t:paren_exp b1:blk ["else" b2:blk] ; 
-
 loop = op:"while" t:paren_exp b:blk ;
-
 dec = fn | rec | var | const ;
-
 decSeq = { d:dec }* ;
-
 var = op:"var" ","%{ idn:identifier "=" e:exp }+ ";" ;
-
 const = op:"const" idn:identifier "=" e:exp ";" ;
-
 fn = op:"def" idn:identifier '(' f:formal ')' b:blk ;
-
 rec = op:"rec" idn:identifier '(' f:formal ')' b:blk ;
-
 formal = ','%{ identifier }* ;
-
 call = idn:identifier '(' a:actual ')' ;
-
 actual = ','%{ exp }* ;
-
-
-
