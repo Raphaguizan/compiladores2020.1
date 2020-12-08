@@ -50,4 +50,4 @@ def fibonacci (x) {
 resp := fibonacci(10);
 print (resp)
 
-// rodar o arquivo imp2-test-fibonacci.py e o arquivo imp2-test-other.py
+// rodar o arquivo imp2-test-fibonacci.py, o arquivo imp2-test-factorial.py e o arquivo imp2-test-other.py

@@ -1,0 +1,16 @@
+// retorna o fatorial de 10 e de 23
+var a = 1, cont = 1;
+var resp1 = 0, resp2 = 0;
+
+def fatorial (x) {
+   while (cont <= x){
+       a := a * cont;
+       cont := cont + 1
+   };
+   return a
+}
+
+resp1 :=  fatorial (10);
+resp2 :=  fatorial (23);
+print (resp1);
+print (resp2)
