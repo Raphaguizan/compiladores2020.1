@@ -24,9 +24,10 @@
 //
 // * Criação das funções __evalReturn e __evalReturnKW dentro da classe CmdPiAut e feito as modificações necessárias para seu funcionamento
 //
-// * A função __evalReturnKW desempilha o valor ja calculado da expressão que tem que ser retornada limpa a lista de valores e recoloca as 
-// variávies v, env e val que precisam ser preservadas para passar o valor de retono e desempilha a pilha de comando até achar a chave CALLBLK 
-// que marcava o início do bloco de uma função a ser atribuída
+// * A função __evalReturnKW desempilha o valor ja calculado da expressão que tem que ser retornada, limpa a lista de valores e recoloca as 
+// variávies v, env e val que precisam ser preservadas para passar o valor de retono, substitui o environment pelo ultimo environment encontrado 
+// na pilha de valores que esta desempilhando para poder reentrar na função e não apagar sua chamada, e desempilha a pilha de comando até achar a 
+// chave CALLBLK que marcava o início do bloco de uma função a ser atribuída
 //
 // * Assing(Cmd) foi modificada para poder receber Call além de uma Exp e uma ArrInt
 
