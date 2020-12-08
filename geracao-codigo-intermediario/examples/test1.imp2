@@ -31,6 +31,8 @@
 // * Assing(Cmd) foi modificada para poder receber Call além de uma Exp e uma ArrInt
 
 
+//exemplo 1 fibonacci com x digitos(no caso 10)
+
 var l1 = [0], resp = [0];
 var a = 0, b = 0, i = 2;
 
