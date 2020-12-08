@@ -1,5 +1,6 @@
 @@grammar::IMP
 @@eol_comments :: /\/\/.*?$/
+@@keyword :: 'return'
 @@keyword :: 'and'
 @@keyword :: 'not'
 @@keyword :: 'or'
@@ -28,7 +29,7 @@
 @@keyword :: 'print'
 
 start = [ds:decSeq] [cs:cmd_seq] $ ;
-exp = bin_exp | arr_conc | arr_idx | arr_append | paren_exp | un_exp | arr_int | @:atom ;
+exp = call | bin_exp | arr_conc | arr_idx | arr_append | paren_exp | un_exp | arr_int | @:atom ;
 
 
 arr_int = "[" e:exp {','e:exp}* "]";
@@ -55,7 +56,9 @@ identifier = /(?!\d)\w+/ ;
 number = /\d+/ ;
 blk = "{" ds:decSeq cs:cmd_seq "}" ;
 cmd_seq = ";"%{ac:atom_cmd}+ ;
-atom_cmd = cond | loop | arr_asgn | assign | print | call | skip ;
+atom_cmd = cmd_return | cond | loop | arr_asgn | assign | print | call | skip ;
+
+cmd_return = op:"return" e:exp;
 
 arr_asgn = idn:identifier"["idx:exp"]" op:":=" e:exp ;
 assign =  idn:identifier op:":=" e:exp ;

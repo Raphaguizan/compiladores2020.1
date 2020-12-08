@@ -773,6 +773,14 @@ class Id(ArithExp, BoolExp):
         return self.operand(0)
 
 
+class Return(Cmd):	
+    def __init__(self, e):	
+        if isinstance(e, Exp) or isinstance(e, ArrInt):	
+            Cmd.__init__(self, e)	
+        else:	
+            raise IllFormed(self, e)
+
+
 class Print(Cmd):
 
     def __init__(self, e):
@@ -801,7 +809,7 @@ class Assign(Cmd):
 
     def __init__(self, i, e):
         if isinstance(i, Id):
-            if isinstance(e, Exp) or isinstance(e, ArrInt):
+            if isinstance(e, Exp) or isinstance(e, ArrInt) or isinstance(e, Call):
                 Cmd.__init__(self, i, e)
             else:
                 raise IllFormed(self, e)
@@ -888,6 +896,7 @@ class CmdKW:
     LOOP   = "#LOOP"
     COND   = "#COND"
     PRINT  = "#PRINT"
+    RETURN = "#RETURN"
 
 class CmdPiAut(ExpPiAut):
 
@@ -896,6 +905,36 @@ class CmdPiAut(ExpPiAut):
         self["sto"] = Sto()
         self["out"] = []
         ExpPiAut.__init__(self)
+
+    def __evalReturn(self, i):	
+       re = i.operand(0)	
+       self.pushCnt(CmdKW.RETURN)	
+       self.pushCnt(re)	
+
+
+    def __evalReturnKW(self):
+        
+        v = self.popVal()
+        env = self.popVal()	
+        val = self.popVal()
+        NewEnv = {}
+        # esvazia val e preserva o ultimo env antes de sair
+        while isinstance(val, dict) or isinstance(val, list):
+            val = self.popVal()	
+            if (isinstance(val, dict)):
+                NewEnv = val	
+        self["env"] = NewEnv # utilizado para não perder a referência da função e poder chama-la novamente
+        
+        self["val"] = [[], [], {}]
+        self.pushVal(env)	
+        self.pushVal(val)	
+        self.pushVal(v)
+        
+        #desenpilha controle até a chave CALLBLK
+        cntJump = self.popCnt()	
+        while cntJump != DecCmdKW.CALLBLK:	
+            cntJump = self.popCnt()	
+
 
     def env(self):
         return self["env"]
@@ -1035,6 +1074,10 @@ class CmdPiAut(ExpPiAut):
             self.__evalLoopKW()
         elif isinstance(c, CSeq):
             self.__evalCSeq(c)
+        elif isinstance(c, Return):	
+            self.__evalReturn(c)	
+        elif c == CmdKW.RETURN:	
+            self.__evalReturnKW()
         else:
             self.pushCnt(c)
             super().eval()
@@ -1156,6 +1199,7 @@ class DecExpKW(ExpKW):
 class DecCmdKW(CmdKW):
     BLKDEC = "#BLKDEC"
     BLKCMD = "#BLKCMD"
+    CALLBLK = "#CALLBLK"	
 
 class DecKW():
     BIND = "#BIND"
@@ -1232,15 +1276,18 @@ class DecPiAut(CmdPiAut):
             self.pushCnt(DecCmdKW.BLKCMD)
             self.pushCnt(c)
 
-    def __evalBlkDecKW(self):
+    def __evalBlkDecKW(self, dec):
         d = self.popVal()
         c = self.popVal()
         en = self.env()
         ne = en.copy()
         ne.update(d)
         self.pushVal(en)
-        self["env"] = ne
-        self.pushCnt(DecCmdKW.BLKCMD)
+        self["env"] = ne	
+        if dec == DecCmdKW.BLKCMD:	
+            self.pushCnt(DecCmdKW.BLKCMD)
+        if dec == DecCmdKW.CALLBLK:	
+            self.pushCnt(DecCmdKW.CALLBLK)
         self.pushCnt(c)
 
     def __evalBlkCmdKW(self):
@@ -1274,10 +1321,10 @@ class DecPiAut(CmdPiAut):
             self.__evalRefKW()
         elif isinstance(d, Blk):
             self.__evalBlk(d)
-        elif d == DecCmdKW.BLKDEC:
-            self.__evalBlkDecKW()
-        elif d == DecCmdKW.BLKCMD:
+        elif d == DecCmdKW.BLKCMD: 
             self.__evalBlkCmdKW()
+        elif d == DecCmdKW.BLKDEC or d == DecCmdKW.CALLBLK:	
+            self.__evalBlkDecKW(d)	
         else:
             self.pushCnt(d)
             super().eval()
@@ -1494,7 +1541,7 @@ class AbsPiAut(DecPiAut):
         ce.update(d)
         self["env"] = ce
         # Pushes the keyword BLKCMD for block completion.
-        self.pushCnt(DecCmdKW.BLKCMD)
+        self.pushCnt(DecCmdKW.CALLBLK)        
         # Pushes the body of the caller function into the control stack.
         self.pushCnt(clos.blk())
 

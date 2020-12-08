@@ -1,0 +1,21 @@
+// esse exemplo mostra que o return ignora tudo o que vem depois dele dentro de uma função
+// a função retorna |x+1 se x < 5| x+5 se x = 5| x+10 se x > 5
+
+var a = 0, b = 5, c = 11;
+
+def test(x){
+    if (x == 5){
+        return x + 5
+    };
+    if (x > 5){
+        return x + 10
+    };
+    return x + 1
+}
+
+a := test(3);
+b := test(5);
+c := test(13);
+print(a);
+print(b);
+print(c)

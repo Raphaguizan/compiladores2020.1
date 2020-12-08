@@ -36,6 +36,9 @@ class Impiler(object):
 
     def arr_conc(self, ast):
         return pi.Conc(ast.l1, ast.l2)
+    
+    def cmd_return (self, ast):
+        return pi.Return(ast.e)
 
     def bin_exp(self, ast):
         if ast.op == "+":

@@ -1,0 +1,53 @@
+//---------------------Especificação da extensão da gramática de Imp para return------------------------------------------------
+// * Adição da palavra return como palavra reservada: @@keyword :: 'return'
+//
+// * Adição da produção cmd_return, não poderia ser somente return por causa da palavra reservada do python: 
+// cmd_return = op:"return" e:exp
+//
+// * Adição do comando cmd_return dentro de atom_cmd
+//
+// * A produção call também teve quer ser inserida dentro de exp para que possa ser chamado uma função dentro de uma atribuição
+// Exemplo:  resp := fibonacci(10);   onde atribuímos o retorno da função a uma variável
+
+
+//-------------------Especificação das Pi denotações de Imp à Pi IR--------------------------------------------------------------
+// Adição da função (cmd_return) que chama a classe (Return) em Pi Framework passando como parametro a expressão que deverá ser retornada
+
+
+//------------------Especificação das novas equações adicionadas ao Pi framework que dão semântica à return em Pi IR--------------------
+// * Criação da classe Return que recebe como parametro um Exp ou um ArrInt
+//
+// * CMDKW recebe também a chave #Return
+//
+// * Criação da chave #CALLBLK e feito as modificações necessárias na classe DecCmdKW para separar o bloco que foi chamado dentro de uma 
+// CALL e saber até onde deve se desempilhar
+//
+// * Criação das funções __evalReturn e __evalReturnKW dentro da classe CmdPiAut e feito as modificações necessárias para seu funcionamento
+//
+// * A função __evalReturnKW desempilha o valor ja calculado da expressão que tem que ser retornada limpa a lista de valores e recoloca as 
+// variávies v, env e val que precisam ser preservadas para passar o valor de retono e desempilha a pilha de comando até achar a chave CALLBLK 
+// que marcava o início do bloco de uma função a ser atribuída
+//
+// * Assing(Cmd) foi modificada para poder receber Call além de uma Exp e uma ArrInt
+
+
+var l1 = [0], resp = [0];
+var a = 0, b = 0, i = 2;
+
+def fibonacci (x) {
+    if (x >= 2){
+        l1 := l1 -> 1
+    };
+    while (i < x){
+        a := l1[i - 2];
+        b := l1[i - 1];
+        l1 := l1 -> a + b;
+        i := i + 1
+    };
+    return l1
+}
+
+resp := fibonacci(10);
+print (resp)
+
+// rodar o arquivo imp2-test-fibonacci.py e o arquivo imp2-test-other.py
